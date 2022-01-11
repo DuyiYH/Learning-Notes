@@ -1,0 +1,67 @@
+static void Main(string[] args)
+{
+    string fileName = "abcde";
+    WriteObject(fileName);
+    ReadObject(fileName);
+}
+
+
+
+public static void WriteObject(string fileName)
+{
+    Console.WriteLine(
+    "Creating a Person object and serializing it.");
+    DerivedClass p1 = new DerivedClass();
+    p1.Property = 10;
+    p1.BaseProperty = 1;
+    FileStream writer = new FileStream(fileName, FileMode.Create);
+    DataContractSerializer ser =
+    new DataContractSerializer(typeof(DerivedClass));
+    ser.WriteObject(writer, p1);
+    writer.Close();
+}
+
+
+
+public static void ReadObject(string fileName)
+{
+    Console.WriteLine("Deserializing an instance of the object.");
+    FileStream fs = new FileStream(fileName,
+    FileMode.Open);
+    XmlDictionaryReader reader =
+    XmlDictionaryReader.CreateTextReader(fs, new XmlDictionaryReaderQuotas());
+    DataContractSerializer ser = new DataContractSerializer(typeof(BaseClass));
+
+
+
+    // Deserialize the data and read it from the instance.
+    DerivedClass deserializedPerson = (DerivedClass)ser.ReadObject(reader, true);
+    reader.Close();
+    fs.Close();
+    Console.WriteLine(deserializedPerson.BaseProperty);
+    }
+}
+
+
+
+[DataContract]
+[KnownType(typeof(DerivedClass))]
+public class BaseClass
+{
+    [DataMember]
+    public int BaseProperty { get; set; }
+
+
+
+    //...
+    //Many other properties with [DataMember]
+}
+
+
+
+[DataContract]
+public class DerivedClass : BaseClass
+{
+    [DataMember]
+    public int Property { get; set; }
+}
